@@ -1,0 +1,62 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: rancher-monitoring-crd-merge
+spec:
+  generators:
+    - merge:
+        mergeKeys:
+          - name
+        generators:
+          - clusters:
+              selector:
+                matchLabels:
+                  environmentId: dev
+                matchExpressions:
+                  - key: cluster
+                    operator: NotIn
+                    values:
+                      - vcluster-10
+              values:
+                path: rancher-monitoring-crd/19.0.3
+          - list:
+              elements:
+                - name: vcluster-15
+                  url: ''
+                  values:
+                    path: rancher-monitoring-crd/19.0.3
+  template:
+    metadata:
+      name: 'rancher-monitoring-crd-me-{{name}}'
+      labels:
+        appset: rancher-monitoring-crd-merge
+      annotations:
+        version: '{{values.path}}'
+    spec:
+      project: rancher-monitoring
+      source:
+        helm:
+          fileParameters:
+            - path: values.yaml
+        repoURL: 'https://github.com/ron1/ron1-rancher-monitoring-gitops.git'
+        targetRevision: HEAD
+        path: '{{values.path}}'
+      destination:
+        name: '{{name}}'
+        namespace: cattle-monitoring-system
+      syncPolicy:
+        automated:
+          prune: false
+          selfHeal: true
+          allowEmpty: false
+        syncOptions:
+          - Validate=true
+          - PrunePropagationPolicy=foreground
+          - CreateNamespace=true
+          - PruneLast=false
+        retry:
+          limit: 2
+          backoff:
+            duration: 5s
+            factor: 2
+            maxDuration: 3m
