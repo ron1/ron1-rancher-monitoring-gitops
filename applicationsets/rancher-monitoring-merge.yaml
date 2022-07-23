@@ -1,6 +1,8 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "2600"
   name: rancher-monitoring-merge
 spec:
   generators:
@@ -31,6 +33,7 @@ spec:
       labels:
         appset: rancher-monitoring-merge
       annotations:
+        argocd.argoproj.io/sync-wave: "2600"
         version: '{{values.path}}'
     spec:
       project: rancher-monitoring
