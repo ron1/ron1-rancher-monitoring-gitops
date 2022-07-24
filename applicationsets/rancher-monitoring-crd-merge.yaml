@@ -15,10 +15,16 @@ spec:
                 matchLabels:
                   environmentId: dev
                 matchExpressions:
-                  - key: cluster
+                  - key: clusterId
                     operator: NotIn
                     values:
                       - vcluster-10
+              values:
+                path: rancher-monitoring-crd/19.0.3
+          - clusters:
+              selector:
+                matchLabels:
+                  bu: ip
               values:
                 path: rancher-monitoring-crd/19.0.3
           - list:
@@ -32,6 +38,7 @@ spec:
       name: 'rancher-monitoring-crd-me-{{name}}'
       labels:
         appset: rancher-monitoring-crd-merge
+        environmentId: '{{metadata.labels.environmentId}}'
       annotations:
         argocd.argoproj.io/sync-wave: "2400"
         version: '{{values.path}}'
@@ -49,14 +56,14 @@ spec:
         namespace: cattle-monitoring-system
       syncPolicy:
         automated:
-          prune: false
+          prune: true
           selfHeal: true
           allowEmpty: false
         syncOptions:
           - Validate=true
           - PrunePropagationPolicy=foreground
           - CreateNamespace=true
-          - PruneLast=false
+          - PruneLast=true
         retry:
           limit: 2
           backoff:

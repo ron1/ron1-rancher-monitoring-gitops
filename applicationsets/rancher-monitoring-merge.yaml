@@ -15,10 +15,16 @@ spec:
                 matchLabels:
                   environmentId: dev
                 matchExpressions:
-                  - key: cluster
+                  - key: clusterId
                     operator: NotIn
                     values:
                       - vcluster-10
+              values:
+                path: rancher-monitoring/19.0.3
+          - clusters:
+              selector:
+                matchLabels:
+                  bu: ip
               values:
                 path: rancher-monitoring/19.0.3
           - list:
@@ -32,6 +38,7 @@ spec:
       name: 'rancher-monitoring-me-{{name}}'
       labels:
         appset: rancher-monitoring-merge
+        environmentId: '{{metadata.labels.environmentId}}'
       annotations:
         argocd.argoproj.io/sync-wave: "2600"
         version: '{{values.path}}'
