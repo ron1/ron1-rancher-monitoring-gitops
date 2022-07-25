@@ -1,0 +1,35 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  annotations:
+    argocd.argoproj.io/sync-wave: "2600"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  name: rancher-monitoring-me-cluster-ckshare-build-2
+spec:
+  project: rancher-monitoring
+  source:
+    repoURL: 'https://github.com/ron1/ron1-rancher-monitoring-gitops.git'
+    path: rancher-monitoring/19.0.3
+    targetRevision: HEAD
+    helm:
+      fileParameters:
+        - path: values.yaml
+  destination:
+    namespace: cattle-monitoring-system
+    name: cluster-ckshare-build-2
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - Validate=true
+      - PrunePropagationPolicy=foreground
+      - CreateNamespace=true
+      - PruneLast=true
+    retry:
+      limit: 2
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
